@@ -94,11 +94,11 @@ const update = (request, response) => {
     {new : true},
     (error, treinador) => {
       if (error) {
-        return response.status(500).sned({new : true})
+        return response.status(500).send(error)
       }
 
       if (treinador) {
-        return response.status(200).send(treinador)
+        return response.status(200).send({new : true})
       }
 
       return response.status(404).send('Treinador não encontrado.')
