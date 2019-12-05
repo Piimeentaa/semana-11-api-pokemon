@@ -4,7 +4,7 @@ const PokemonsSchema = new Schema({
   _id: { type: mongoose.Schema.Types.ObjectId, auto: true, required: true },
   nome: { type: String, required: true },
   foto: { type: String, required: true },
-  senha: { type: String, required: true },
+  senha: { type: String },
   nivel: { type: Number },
 })
 
