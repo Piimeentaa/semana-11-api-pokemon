@@ -2,7 +2,18 @@ const { connect } = require('../models/Repository')
 const treinadoresModel = require('../models/TreinadoresSchema')
 const { pokemonsModel } = require('../models/PokemonsSchema')
 const bcrypt = require('bcryptjs')
+<<<<<<< HEAD
+=======
+const jwt = require('jsonwebtoken')
+
+>>>>>>> de74a0744d5d80c690506d948c2513e8bef7f3b9
 connect()
+
+const calcularNivel = (inicio, fim, nivelAtual) => {
+  const diff = Math.abs(new Date(inicio) - new Date(fim)) / 3600000
+
+  return (diff / 4) + nivelAtual;
+}
 
 const getAll = (request, response) => {
   treinadoresModel.find((error, treinadores) => {
@@ -31,12 +42,17 @@ const getById = (request, response) => {
 }
 
 const add = (request, response) => {
+<<<<<<< HEAD
   if(!request.body.senha){
     return response.status(400).send("bota a senha ai coroi")
   }
   const senhaCriptonita = bcrypt.hashSync(request.body.senha)
   const novoObjeto = new Object(request.body)
   novoObjeto.senha = senhaCriptonita
+=======
+  const senhaCriptografada = bcrypt.hashSync(request.body.senha) //hashSync indica que a função é síncrona. o método hash() pede async/await, pois retorna uma promise
+  request.body.senha = senhaCriptografada //substitui senha da request para a senha 'hasherizada' antes de criar um novo treinador
+>>>>>>> de74a0744d5d80c690506d948c2513e8bef7f3b9
   const novoTreinador = new treinadoresModel(request.body)
 
   novoTreinador.save((error) => {
@@ -63,6 +79,45 @@ const login = async (request, responde)=>{
 }
 
 
+//Para não alterar o objeto original:
+// const add = (request, response) => {
+//   const senhaCriptografada = bcrypt.hashSync(request.body.senha) //hashSync indica que a função é síncrona
+//   const novoObj = New Object (request.body)
+//   novoObj.senha = senhaCriptografada //o body irá conter a senha criptografada ao invés da senha que o usuário coloca
+//   const novoTreinador = new treinadoresModel(request.body)
+
+//   novoTreinador.save((error) => {
+//     if (error) {
+//       return response.status(500).send(error)
+//     }
+
+//     return response.status(201).send(novoTreinador)
+//   })
+// }
+
+const login = async (request, response) => {
+  const email = request.body.email
+  const senha = request.body.senha
+  const treinador = await treinadoresModel.findOne({email})
+  const senhaValida = bcrypt.compareSync(senha, treinador.senha) // compareSync = compara uma senha hasheriada e outra não. há retorno de um booleano
+  
+  if (!treinador){
+    return response.status(404).send('email inválido') // email deve ser válido, obrigatório e único
+  }
+
+  if (senhaValida) {
+    const token = jwt.sign(
+      {id: treinadorId, email: treinador.email},
+      PRIVATE_KEY // criar as variáveis com a chave pública e privada
+    )} // a criptografia é feita depois da validação do usuário
+    //return response.status(200).send('usuário logado')
+  }
+  return response.status(401).send('senha inválidos')
+}
+
+// 401 - unauthorized - usuário não autenticado
+// 403 - forbidden - usuário não permitido a acessar a página, porém autenticado
+
 const remove = (request, response) => {
   const id = request.params.id
 
@@ -84,6 +139,7 @@ const update = (request, response) => {
   const treinadorUpdate = request.body
 
   treinadoresModel.findByIdAndUpdate(
+<<<<<<< HEAD
     {_id: id}, //filtros que identificam o id que vamos atualizar
     { $set: { //desta maneira se passa os campos que pretende atualizar. SET é usado em arrays, 
       // quando não se sabe ao certo a posição
@@ -92,6 +148,17 @@ const update = (request, response) => {
     'treinadoresModel.$.foto': treinadorUpdate.foto
   }},
     {new : true},
+=======
+    id,
+    treinadorUpdate,
+    options,
+    {_id: id},
+    { $set: { 
+      'treinadoresModel.$.nome': treinadores.nome,
+      'treinadoresModel.$.foto': treinadores.foto,
+      'treinadoresModel.$.pokemons': treinadores.pokemons
+    }},
+>>>>>>> de74a0744d5d80c690506d948c2513e8bef7f3b9
     (error, treinador) => {
       if (error) {
         return response.status(500).send(error)
@@ -109,10 +176,9 @@ const update = (request, response) => {
 const addPokemon = async (request, response) => {
   const treinadorId = request.params.treinadorId
   const pokemon = request.body
-  const options = { new: true }
   const novoPokemon = new pokemonsModel(pokemon)
   const treinador = await treinadoresModel.findById(treinadorId)
-
+  console.log(treinador, 'TAKI')
   treinador.pokemons.push(novoPokemon)
   treinador.save((error) => {
     if (error) {
@@ -153,7 +219,14 @@ const buscarPokemon = async (request,response) => {
   const pokemonId = request.params.pokemonId
 
   const treinador = await treinadoresModel.findById(treinadorId)
+<<<<<<< HEAD
   const pokemon = treinador.pokemons.find((pokemon) =>{ return pokemonId == pokemon._id}) //Obs: pokemon._id é um ObjectId (tipo do MongoDB)
+=======
+  const pokemon = treinador.pokemons.find((pokemon) => {
+    return pokemonId == pokemon._id
+  
+  })  //Obs: pokemon._id é um ObjectId (tipo do MongoDB)
+>>>>>>> de74a0744d5d80c690506d948c2513e8bef7f3b9
 
   if (!pokemon) {
     return response.status(500).send("error")
@@ -175,11 +248,12 @@ const buscarPokemon = async (request,response) => {
 
   const updatePokemon = (request, response) => {
     const treinadorId = request.params.treinadorId
-    const PokemonId = request.params.pokemonId
+    const pokemonId = request.params.pokemonId
 
     treinadoresModel.findByOneAndUpdate( 
-      {_id: treinadorId, 'pokemons.$._id': pokemonId}, //filtros que identificam o id que vamos atualizar
-      { $set: { //desta maneira se passa os campos que pretende atualizar. SET é usado em arrays, quando não se sabe ao certo a posição
+      {_id: treinadorId, 'pokemons.$._id': pokemonId}, //filtros (query) que identificam o id que vamos atualizar
+      //pokemon,  - dessa maneira atualiza todas as propriedades
+      { $set: { //desta maneira se passa os campos que pretende atualizar. SET (set operator) é usado em arrays, quando não se sabe ao certo o índice dentro do array que se pretende atualizar
         'pokemons.$.nome': pokemon.nome,
         'pokemons.$.foto': pokemon.foto
       }},

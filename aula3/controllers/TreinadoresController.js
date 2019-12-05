@@ -2,6 +2,7 @@ const { connect } = require('../models/Repository')
 const treinadoresModel = require('../models/TreinadoresSchema')
 const { pokemonsModel } = require('../models/PokemonsSchema')
 const bcrypt = require('bcryptjs')
+<<<<<<< HEAD
 const jwt = require('jsonwebtoken')
 
 const CHAVE_PUBLICA = 'MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCOl54HaBM/WiL/jPPdFGjm9f8VprUst1J+vs7G/YRGRHYLGqt+M/ljAhcROPy3FdaVi2smqqyZhf4d+EZ9lKM6LVed91sxvcyMFEp6x8R2KS9wIzUtJ6r1MAIKd8HURmbaN4V2TV/FLeOUANRCZ+QhYEy+eNbuVIJANYtXBUSn8QIDAQAB'
@@ -28,12 +29,18 @@ const verificarLogin = (request, response) => {
   return autenticado
 }
 
+=======
+
+connect()
+
+>>>>>>> de74a0744d5d80c690506d948c2513e8bef7f3b9
 const calcularNivel = (inicio, fim, nivelAtual) => {
   const diff = Math.abs(new Date(inicio) - new Date(fim)) / 3600000
 
   return (diff / 4) + nivelAtual;
 }
 
+<<<<<<< HEAD
 const montarPokemonUpdateBody = async (body) => {
   let setBody = {}
 
@@ -52,6 +59,8 @@ const montarPokemonUpdateBody = async (body) => {
   )
 }
 
+=======
+>>>>>>> de74a0744d5d80c690506d948c2513e8bef7f3b9
 const getAll = (request, response) => {
   treinadoresModel.find((error, treinadores) => {
     if (error) {
@@ -79,6 +88,12 @@ const getById = (request, response) => {
 }
 
 const add = (request, response) => {
+<<<<<<< HEAD
+=======
+  if (!request.body.senha) {
+    return response.status(400).send('bota a senha aí')
+  }
+>>>>>>> de74a0744d5d80c690506d948c2513e8bef7f3b9
   const senhaCriptografada = bcrypt.hashSync(request.body.senha)
   request.body.senha = senhaCriptografada
   const novoTreinador = new treinadoresModel(request.body)
@@ -92,6 +107,22 @@ const add = (request, response) => {
   })
 }
 
+<<<<<<< HEAD
+=======
+const login = async (request, response) => {
+  const email = request.body.email
+  const senha = request.body.senha
+  const treinador = await treinadoresModel.findOne({ email })
+  const senhaValida = bcrypt.compareSync(senha, treinador.senha)
+
+  if (senhaValida) {
+    return response.status(200).send('Usuário logado')
+  }
+
+  return response.status(401).send('Usuário ou senha inválidos')
+}
+
+>>>>>>> de74a0744d5d80c690506d948c2513e8bef7f3b9
 const remove = (request, response) => {
   const id = request.params.id
 
@@ -149,6 +180,7 @@ const addPokemon = async (request, response) => {
 }
 
 const treinarPokemon = async (request, response) => {
+<<<<<<< HEAD
   const pokemonId = request.params.pokemonId
   const treinadorId = request.params.treinadorId
   const treinador = await treinadoresModel.findById(treinadorId)
@@ -157,6 +189,18 @@ const treinarPokemon = async (request, response) => {
   pokemon.nivel = calcularNivel(request.body.inicio, request.body.fim, pokemon.nivel)
 
   return treinador.save((error) => {
+=======
+  const treinadorId = request.params.treinadorId
+  const pokemonId = request.params.pokemonId
+  const inicio = request.body.inicio
+  const fim = request.body.fim
+  const treinador = await treinadoresModel.findById(treinadorId)
+  const pokemon = treinador.pokemons.find((pokemon) => pokemonId == pokemon._id)
+  const novoNivel = calcularNivel(inicio, fim, pokemon.nivel)
+
+  pokemon.nivel = novoNivel
+  treinador.save((error) => {
+>>>>>>> de74a0744d5d80c690506d948c2513e8bef7f3b9
     if (error) {
       return response.status(500).send(error)
     }
@@ -165,6 +209,7 @@ const treinarPokemon = async (request, response) => {
   })
 }
 
+<<<<<<< HEAD
 const getPokemons = async (request, response) => {
   const authHeader = request.get('authorization')
   let autenticado = false
@@ -214,20 +259,67 @@ const updatePokemon = async (request, response) => {
     { _id: treinadorId, 'pokemons._id': pokemonId },
     updateBody,
     options,
+=======
+const getPokemonById = async (request, response) => {
+  const treinadorId = request.body.treinadorId
+  const pokemonId = request.body.pokemonId
+  const treinador = await treinadoresModel.findById(treinadorId)
+  const pokemon = treinador.pokemons.find((pokemon) => {
+    return pokemonId == pokemon._id
+  })
+
+  if (pokemon) {
+    return response.status(200).send(pokemon)
+  }
+
+  return response.status(404).send('Pokémon não encontrado')
+}
+
+const getAllPokemons = async (request, response) => {
+  const treinadorId = request.params.id
+  const treinador = await treinadoresModel.findById(id)
+
+  if (treinador) {
+    return response.status(200).send(treinador.pokemons)
+  }
+
+  return response.status(404).send('Treinador não encontrado.')
+}
+
+const updatePokemon = (request, response) => {
+  const treinadorId = request.params.treinadorId
+  const pokemonId = request.params.pokemonId
+  const pokemon = request.body
+
+  treinadoresModel.findOneAndUpdate(
+    { _id: treinadorId, 'pokemons.$._id': pokemonId },
+    { $set:
+        {
+          'pokemons.$.nome': pokemon.nome,
+          'pokemons.$.foto': pokemon.foto
+        }
+    },
+    { new: true },
+>>>>>>> de74a0744d5d80c690506d948c2513e8bef7f3b9
     (error, treinador) => {
       if (error) {
         return response.status(500).send(error)
       }
 
+<<<<<<< HEAD
       if (treinador) {
         return response.status(200).send(treinador)
       }
 
       return response.status(404).send('Treinador não encontrado.')
+=======
+      return response.status(200).send(treinador)
+>>>>>>> de74a0744d5d80c690506d948c2513e8bef7f3b9
     }
   )
 }
 
+<<<<<<< HEAD
 const getPokemonById = async (request, response) => {
   const treinadorId = request.params.treinadorId
   const pokemonId = request.params.pokemonId
@@ -262,6 +354,8 @@ const login = async (request, response) => {
   return response.status(404).send('Treinador não encontrado.')
 }
 
+=======
+>>>>>>> de74a0744d5d80c690506d948c2513e8bef7f3b9
 module.exports = {
   getAll,
   getById,
@@ -270,8 +364,15 @@ module.exports = {
   update,
   addPokemon,
   treinarPokemon,
+<<<<<<< HEAD
   getPokemons,
   updatePokemon,
   getPokemonById,
   login
 }
+=======
+  getPokemonById,
+  updatePokemon,
+  login
+}
+>>>>>>> de74a0744d5d80c690506d948c2513e8bef7f3b9

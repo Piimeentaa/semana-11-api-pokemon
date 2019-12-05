@@ -6,8 +6,12 @@ const TreinadoresSchema = new Schema({
   nome: { type: String, required: true },
   email: { type: String, required: true },
   foto: { type: String, required: true },
+<<<<<<< HEAD
   senha:{type: String, require: true},
   
+=======
+  senha: {type: String, required: true},
+>>>>>>> de74a0744d5d80c690506d948c2513e8bef7f3b9
   pokemons: [PokemonsSchema],
 })
 
